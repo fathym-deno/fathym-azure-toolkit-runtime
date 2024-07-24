@@ -1,0 +1,76 @@
+{
+  "lock": false,
+  "tasks": {
+    "build": "deno task build:fmt && deno task build:lint && deno task build:main",
+    "build:dev": "deno run -A dev.ts build",
+    "build:docker": "docker build --no-cache -t fathym-azure-toolkit-runtime -f DOCKERFILE .",
+    "build:fmt": "deno fmt",
+    "build:lint": "deno lint",
+    "build:main": "deno run -A main.ts build",
+    "check": "deno fmt --check && deno lint && deno check **/*.ts && deno check **/*.tsx",
+    "clean:docker": "docker stop fathym-azure-toolkit-runtime || true && docker rm fathym-azure-toolkit-runtime || true",
+    "deploy": "deno task build && deno task test && npx ftm git",
+    "deploy:docker": "docker run --name fathym-azure-toolkit-runtime --network eac-runtimes --env-file .env.docker -dp 127.0.0.1:6151:6151 fathym-azure-toolkit-runtime",
+    "dev": "deno run -A --watch=apps/,configs/,data/,routes/,src/,static/ dev.ts",
+    "network:docker": "docker network create eac-runtimes || true",
+    "refresh:docker": "deno task build:docker && deno task network:docker && deno task clean:docker && deno task deploy:docker",
+    "start": "deno run -A main.ts",
+    "test": "deno test -A tests/tests.ts --coverage=cov"
+  },
+  "imports": {
+    "@fathym/common": "https://deno.land/x/fathym_common@v0.0.185/mod.ts",
+    "@fathym/eac": "https://deno.land/x/fathym_everything_as_code@v0.0.415/mod.ts",
+    "@fathym/eac/runtime": "https://deno.land/x/fathym_eac_runtime@v0.0.291/mod.ts",
+    "@fathym/eac/runtime/": "https://deno.land/x/fathym_eac_runtime@v0.0.291/",
+    "@fathym/eac/runtime/browser": "https://deno.land/x/fathym_eac_runtime@v0.0.291/browser.ts",
+    "@fathym/ioc": "https://deno.land/x/fathym_ioc@v0.0.10/mod.ts",
+    "@fathym/synaptic": "https://deno.land/x/fathym_synaptic@v0.0.67/mod.ts",
+    "@fathym/synaptic/": "https://deno.land/x/fathym_synaptic@v0.0.67/",
+    "preact": "https://esm.sh/preact@10.20.1",
+    "preact/": "https://esm.sh/preact@10.20.1/",
+    "preact-render-to-string": "https://esm.sh/*preact-render-to-string@6.4.0"
+  },
+  "exclude": [
+    "**/_eac-runtime/*"
+  ],
+  "lint": {
+    "include": [
+      "apps/",
+      "configs/",
+      "src/",
+      "tests/"
+    ],
+    "exclude": [],
+    "rules": {
+      "tags": [
+        "recommended"
+      ],
+      "include": [
+        "ban-untagged-todo"
+      ],
+      "exclude": []
+    }
+  },
+  "fmt": {
+    "include": [
+      "apps/",
+      "configs/",
+      "src/",
+      "tests/"
+    ],
+    "exclude": [],
+    "indentWidth": 2,
+    "lineWidth": 100,
+    "proseWrap": "preserve",
+    "semiColons": true,
+    "singleQuote": true,
+    "useTabs": false
+  },
+  "unstable": [
+    "kv"
+  ],
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "jsxImportSource": "preact"
+  }
+}
