@@ -6,12 +6,17 @@ import {
   FathymDFSFileHandlerPlugin,
   FathymEaCServicesPlugin,
 } from '@fathym/eac/runtime';
-import { EaCSynapticCircuitsProcessor, FathymSynapticPlugin } from '@fathym/synaptic';
+import {
+  EaCSynapticCircuitsProcessor,
+  FathymSynapticPlugin,
+} from '@fathym/synaptic';
 import { DefaultMyCoreProcessorHandlerResolver } from './DefaultMyCoreProcessorHandlerResolver.ts';
 import FathymAzureToolkitSynapticPlugin from './FathymAzureToolkitSynapticPlugin.ts';
 import { IoCContainer } from '@fathym/ioc';
 
-export default class FathymAzureToolkitRuntimePlugin implements EaCRuntimePlugin {
+export default class FathymAzureToolkitRuntimePlugin
+  implements EaCRuntimePlugin
+{
   constructor() {}
 
   public Setup(config: EaCRuntimeConfig) {
@@ -49,11 +54,26 @@ export default class FathymAzureToolkitRuntimePlugin implements EaCRuntimePlugin
                 PathPattern: '/circuits*',
                 Priority: 100,
               },
+              'all-circuits': {
+                PathPattern: '/all-circuits*',
+                Priority: 100,
+              },
             },
           },
         },
         Applications: {
           circuits: {
+            Details: {
+              Name: 'Circuits',
+              Description: 'The API for accessing circuits',
+            },
+            ModifierResolvers: {},
+            Processor: {
+              Type: 'SynapticCircuits',
+              Includes: [`cloud|azure-connect`],
+            } as EaCSynapticCircuitsProcessor,
+          },
+          'all-circuits': {
             Details: {
               Name: 'Circuits',
               Description: 'The API for accessing circuits',

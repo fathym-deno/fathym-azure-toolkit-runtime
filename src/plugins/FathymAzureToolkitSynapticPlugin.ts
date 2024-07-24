@@ -1,46 +1,40 @@
-import { EaCRuntimeConfig, EaCRuntimePlugin, EaCRuntimePluginConfig } from '@fathym/eac/runtime';
-import { EaCESMDistributedFileSystem } from '@fathym/eac';
-import { EaCDynamicToolDetails, EaCLinearCircuitDetails, EaCToolNeuron } from '@fathym/synaptic';
+import {
+  EaCRuntimeConfig,
+  EaCRuntimePlugin,
+  EaCRuntimePluginConfig,
+} from '@fathym/eac/runtime';
+import {
+  EaCLinearCircuitDetails,
+  EaCToolNeuron,
+  EverythingAsCodeSynaptic,
+} from '@fathym/synaptic';
 import { z } from 'npm:zod';
+import AzureConnectPlugin from './azure/AzureConnectPlugin.ts';
 
-export default class FathymAzureToolkitSynapticPlugin implements EaCRuntimePlugin {
+export default class FathymAzureToolkitSynapticPlugin
+  implements EaCRuntimePlugin
+{
   constructor() {}
 
   public Setup(_config: EaCRuntimeConfig) {
     const pluginConfig: EaCRuntimePluginConfig = {
       Name: FathymAzureToolkitSynapticPlugin.name,
-      Plugins: [],
+      Plugins: [new AzureConnectPlugin()],
       EaC: {
-        DFS: {
-          'fathym-synaptic-resolvers': {
-            Type: 'ESM',
-            Root: '@fathym/synaptic/',
-            EntryPoints: ['resolvers.ts'],
-            IncludeDependencies: false,
-            WorkerPath: import.meta.resolve(
-              '@fathym/eac/runtime/src/runtime/dfs/workers/EaCESMDistributedFileSystemWorker.ts',
-            ),
-          } as EaCESMDistributedFileSystem,
-        },
         AIs: {
-          core: {
-            Tools: {
-              simple: {
+          [FathymAzureToolkitSynapticPlugin.name]: {
+            Personalities: {
+              [`Thinky`]: {
                 Details: {
-                  Type: 'Dynamic',
-                  Name: 'simple',
-                  Description: 'Use this tool as a simple example.',
-                  Schema: z.object({ Value: z.string() }),
-                  Action: ({ Value }: { Value: string }) => {
-                    return Promise.resolve(`Tool Processed: ${Value}`);
-                  },
-                } as EaCDynamicToolDetails,
+                  SystemMessages: [
+                    `You are Thinky, the user's Fathym assistant. `
+                  ],
+                },
               },
             },
           },
         },
         Circuits: {
-          $handlers: ['fathym-synaptic-resolvers'],
           'simple-tool': {
             Details: {
               Type: 'Linear',
@@ -54,7 +48,7 @@ export default class FathymAzureToolkitSynapticPlugin implements EaCRuntimePlugi
               Neurons: {
                 '': {
                   Type: 'Tool',
-                  ToolLookup: 'core|simple',
+                  ToolLookup: `${FathymAzureToolkitSynapticPlugin.name}|simple`,
                   BootstrapInput: ({ Input }: { Input: string }) => {
                     return { Value: Input };
                   },
@@ -66,7 +60,7 @@ export default class FathymAzureToolkitSynapticPlugin implements EaCRuntimePlugi
             } as EaCLinearCircuitDetails,
           },
         },
-      },
+      } as EverythingAsCodeSynaptic,
     };
 
     return Promise.resolve(pluginConfig);
