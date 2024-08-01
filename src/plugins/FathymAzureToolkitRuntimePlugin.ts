@@ -6,17 +6,14 @@ import {
   FathymDFSFileHandlerPlugin,
   FathymEaCServicesPlugin,
 } from '@fathym/eac/runtime';
-import {
-  EaCSynapticCircuitsProcessor,
-  FathymSynapticPlugin,
-} from '@fathym/synaptic';
+import { EaCSynapticCircuitsProcessor, FathymSynapticPlugin } from '@fathym/synaptic';
 import { DefaultMyCoreProcessorHandlerResolver } from './DefaultMyCoreProcessorHandlerResolver.ts';
 import FathymAzureToolkitSynapticPlugin from './FathymAzureToolkitSynapticPlugin.ts';
 import { IoCContainer } from '@fathym/ioc';
+import AzureConnectPlugin from './azure/AzureConnectPlugin.ts';
+import { EaCDenoKVDatabaseDetails } from '@fathym/eac';
 
-export default class FathymAzureToolkitRuntimePlugin
-  implements EaCRuntimePlugin
-{
+export default class FathymAzureToolkitRuntimePlugin implements EaCRuntimePlugin {
   constructor() {}
 
   public Setup(config: EaCRuntimeConfig) {
@@ -70,7 +67,7 @@ export default class FathymAzureToolkitRuntimePlugin
             ModifierResolvers: {},
             Processor: {
               Type: 'SynapticCircuits',
-              Includes: [`cloud|azure-connect`],
+              Includes: [`${AzureConnectPlugin.name}|cloud|azure-connect`],
             } as EaCSynapticCircuitsProcessor,
           },
           'all-circuits': {
@@ -82,6 +79,16 @@ export default class FathymAzureToolkitRuntimePlugin
             Processor: {
               Type: 'SynapticCircuits',
             } as EaCSynapticCircuitsProcessor,
+          },
+        },
+        Databases: {
+          thinky: {
+            Details: {
+              Type: 'DenoKV',
+              Name: 'Thinky',
+              Description: 'The Deno KV database to use for thinky',
+              DenoKVPath: Deno.env.get('THINKY_DENO_KV_PATH') || undefined,
+            } as EaCDenoKVDatabaseDetails,
           },
         },
       },
